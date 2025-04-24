@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import heapq #part of standard lib
+import time
 def main():
     if len(sys.argv) != 3:
         print("Usage: python3planner planner.py <algorithm> <world-file>")
@@ -30,7 +31,7 @@ def main():
 
     # Choose algorithm: DFS
     elif algorithm == "depth-first":
-        pass
+        depth_first_search(starting_pos, dirty_cells, world_arr, rows, cols)
 
     # Choose algorithm: Invalid
     else:
@@ -105,7 +106,52 @@ def uniform_cost_search(starting_pos, dirty_cells, world_arr, rows, cols):
             heapq.heappush(frontier, (cost + 1, new_state, path + ['V']))
 
 
-def depth_first_search():
-    pass
+def depth_first_search(starting_pos, dirty_cells, world_arr, rows, cols):
+    start_state = (starting_pos, frozenset(dirty_cells))
+    stack = []
+    stack.append((start_state, [])) # state, path
+    visited = []
+
+    nodes_generated = 1
+    nodes_expanded = 0
+    print(len(stack))
+    while len(stack) > 0:
+
+        (pos, remaining_dirt), path = stack.pop()
+
+        # Reached goal?
+        if len(remaining_dirt) == 0:
+            print("Vrroooomm")
+            for action in path:
+                print(action)
+            print(f"Nodes generated: {nodes_generated}")
+            print(f"Nodes expanded: {nodes_expanded}")
+            return
+
+        #Else
+        state_id = (pos, remaining_dirt)
+        if state_id in visited:
+            continue # Already seen this node
+        nodes_expanded += 1
+
+        # Add node to visited nodes
+        visited.append(state_id)
+
+        # Explore N,W,S,E
+        for direction, coords in [('N', (-1, 0)), ('E', (0, 1)), ('S', (1, 0)), ('W', (0, -1))]:
+            new_x = pos[0] + coords[0]
+            new_y = pos[1] + coords[1]
+            if 0 <= new_y < cols and 0 <= new_x < rows and world_arr[new_x][new_y] != '#':
+                new_pos = (new_x, new_y)
+                new_state = (new_pos, remaining_dirt)
+                stack.append((new_state, path + [direction]))
+                nodes_generated += 1
+
+        # Vacuum on dirty spot
+        if pos in remaining_dirt:
+            new_dirt = remaining_dirt - {pos}
+            new_state = (pos, new_dirt)
+            stack.append((new_state, path + ['V']))
+
 if __name__ == "__main__":
     main()

@@ -104,13 +104,14 @@ def uniform_cost_search(starting_pos, dirty_cells, world_arr, rows, cols):
             new_dirt = remaining_dirt - {pos}
             new_state = (pos, new_dirt)
             heapq.heappush(frontier, (cost + 1, new_state, path + ['V']))
+            nodes_generated += 1
 
 
 def depth_first_search(starting_pos, dirty_cells, world_arr, rows, cols):
     start_state = (starting_pos, frozenset(dirty_cells))
     stack = []
     stack.append((start_state, [])) # state, path
-    visited = []
+    visited = set()
 
     nodes_generated = 1
     nodes_expanded = 0
@@ -135,7 +136,7 @@ def depth_first_search(starting_pos, dirty_cells, world_arr, rows, cols):
         nodes_expanded += 1
 
         # Add node to visited nodes
-        visited.append(state_id)
+        visited.add(state_id)
 
         # Explore N,W,S,E
         for direction, coords in [('N', (-1, 0)), ('E', (0, 1)), ('S', (1, 0)), ('W', (0, -1))]:
@@ -152,6 +153,6 @@ def depth_first_search(starting_pos, dirty_cells, world_arr, rows, cols):
             new_dirt = remaining_dirt - {pos}
             new_state = (pos, new_dirt)
             stack.append((new_state, path + ['V']))
-
+            nodes_generated += 1
 if __name__ == "__main__":
     main()
